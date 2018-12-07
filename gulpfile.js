@@ -2,36 +2,36 @@ var gulp = require('gulp'),
     htmlmin = require('gulp-htmlmin'),
     notify = require('gulp-notify'),
     cleancss = require('gulp-clean-css'),
-    clean = require('gulp-clean'),
     uglify = require('gulp-uglify'),
-    assetRev = require('gulp-asset-rev');
+    assetRev = require('gulp-asset-rev'),
+    copy = require('gulp-copy'),
+    clean = require('gulp-clean');
 
 gulp.task('html', function () {
     return gulp.src('src/**/*.html')
-        .pipe(assetRev())
         .pipe(htmlmin({collapseWhitespace: true}))
-        .pipe(gulp.dest('dist'))
-        .pipe(notify({message: 'HTML文件压缩完毕'}));
+        .pipe(gulp.dest('dist'));
 });
 gulp.task('css', function () {
-    return gulp.src('src/css/**/*.css')
+    return gulp.src('src/**/*.css')
         .pipe(assetRev())
-        .pipe(cleancss({compatibility: 'ie8'}))
-        .pipe(gulp.dest('dist/css'))
-        .pipe(notify({message: 'CSS文件压缩完毕'}));
+        // https://www.npmjs.com/package/clean-css#important-40-breaking-changes
+        .pipe(cleancss({compatibility: 'ie8', rebase: false}))
+        .pipe(gulp.dest('dist'));
 });
 gulp.task('js', function () {
-    return gulp.src('src/js/**/*.js')
+    return gulp.src('src/**/*.js')
         .pipe(assetRev())
         .pipe(uglify())
-        .pipe(gulp.dest('dist/js'))
-        .pipe(notify({message: 'js文件混缩完毕'}));
+        .pipe(gulp.dest('dist'));
 });
-
+gulp.task('copy', function () {
+    return gulp.src(['src/**/**', '!src/**/*.{html,css,js}'])
+        .pipe(gulp.dest('dist'));
+});
 gulp.task('clean', function () {
     return gulp.src('dist')
-        .pipe(clean())
-        .pipe(notify({message: '删除完毕'}));
+        .pipe(clean());
 });
 
-gulp.task('default', ['clean', 'html', 'css', 'js']);
+gulp.task('default', ['clean', 'copy', 'html', 'css', 'js']);
